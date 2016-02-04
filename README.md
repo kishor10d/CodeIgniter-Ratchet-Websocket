@@ -12,7 +12,7 @@ There is a folder called
                 
 I put my code here and just call that code using Javascript websocket.
 
-How to use :
+### How to use :
 
 1) Download the code.
 
@@ -28,27 +28,41 @@ How to use :
 5) Open Command Prompt
   Move towards your webroot folder.
   We are having our websocket code at following path in our project.
-  
-    application/third_party/Realtime/bin/server.php
+  ```sh
+  application/third_party/Realtime/bin/server.php
+  ```
   
   We have to run that server.php file from command prompt.
   
   Just move to that folder by using "cd" command.
-  
-    c:/>cd xampp/htdocs/ci-ratchet/application/third_party/Realtime/bin
+  ```sh
+  c:/>cd xampp/htdocs/ci-ratchet/application/third_party/Realtime/bin
+  ```
     
   Press enter.. Now you are in that directory specifically, just run following command.
-  
-    c:/>php server.php
+  ```sh
+  c:/>php server.php
+  ```
   
   If its error free and noting is populated, then its supposed that you got the success to start the websocket server.
   
   6) Now run your ci-ratchet project in browser by hitting url.
-  
-    http://localhost/ci-ratchet/
+  ```sh
+  http://localhost/ci-ratchet/
+  ```
 
   Once AngularJS initialize, you can see the Textbox, just start typing and press enter.... VOLLAAAAAAAAA
 
   Its working
   
 7) Check it in another browser for realtime experience.
+
+
+### What I used?
+
+1) **CodeIgniter** 3.x PHP Framework (https://www.codeigniter.com/) 
+
+2) **Ratchet** - Websocket for PHP (http://socketo.me/) by Chris Boden(@boden_c)
+
+3) **AngularJS** - A superheroic Javascript MVW Framework by Google
+
