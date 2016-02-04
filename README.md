@@ -1,14 +1,15 @@
 # CodeIgniter-Ratchet-Websocket
-This library contains the demo of commenting/posting realtime using CodeIgniter+AngularJS+Ratchet PHP Websocket
+This library contains the demo of commenting/posting realtime using **CodeIgniter-Ratchet-Websocket** with **AngularJS** as client-side javascript framwork.
 
 There is no rocket science I have done to achieve this.
+
 As you know the CodeIgniter Directory Structure
 
 There is a folder called
     CI-
       -application
           -third_party
-            -Realtime (Ratchet PHP Websocket Library)
+            -Realtime (I put here Ratchet PHP Websocket Library)
                 
 I put my code here and just call that code using Javascript websocket.
 
