@@ -1,0 +1,7 @@
+[14-Jan-2016 04:46:07 UTC] PHP Fatal error:  Class 'Ratchet\http\HttpServer' not found in /home/talentxt/public_html/test/application/third_party/Realtime/bin/server.php on line 11
+[14-Jan-2016 06:18:45 UTC] PHP Fatal error:  Uncaught exception 'React\Socket\ConnectionException' with message 'Could not bind to tcp://0.0.0.0:2000: Address already in use' in /home/talentxt/public_html/test/application/third_party/Realtime/vendor/react/socket/src/Server.php:29
+Stack trace:
+#0 /home/talentxt/public_html/test/application/third_party/Realtime/vendor/cboden/ratchet/src/Ratchet/Server/IoServer.php(70): React\Socket\Server->listen(2000, '0.0.0.0')
+#1 /home/talentxt/public_html/test/application/third_party/Realtime/bin/server.php(11): Ratchet\Server\IoServer::factory(Object(Ratchet\Http\HttpServer), 2000)
+#2 {main}
+  thrown in /home/talentxt/public_html/test/application/third_party/Realtime/vendor/react/socket/src/Server.php on line 29
