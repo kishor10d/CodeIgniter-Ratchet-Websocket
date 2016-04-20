@@ -58,6 +58,9 @@ I put my code here and just call that code using Javascript websocket.
   
 7) Check it in another browser for realtime experience.
 
+8) It has some permission issues on shared hosting, so it will gives throw some error. Check issue @ https://github.com/ratchetphp/Ratchet/issues/409
+
+It will work for sure if you have same user for your VPS and shared hosting space.
 
 ### What I used?
 
