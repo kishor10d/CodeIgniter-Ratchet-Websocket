@@ -37,12 +37,12 @@ I put my code here and just call that code using Javascript websocket.
   
   Just move to that folder by using "cd" command.
   ```sh
-  c:/>cd xampp/htdocs/ci-ratchet/application/third_party/Realtime/bin
+  c:/>cd xampp\htdocs\ci-ratchet\application\third_party\Realtime\bin
   ```
     
   Press enter.. Now you are in that directory specifically, just run following command.
   ```sh
-  c:/>php server.php
+  c:\xampp\htdocs\ci-ratchet\application\third_party\Realtime\bin>php server.php
   ```
   
   If its error free and noting is populated, then its supposed that you got the success to start the websocket server.
