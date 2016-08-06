@@ -80,4 +80,4 @@ View : jquery.php
 
 Assets/App : Connection2.js
 
-URL : http://localhost/ci-ratchet/index.php/jquery
+URL : <http://localhost/ci-ratchet/index.php/jquery>
