@@ -70,3 +70,13 @@ It will work for sure if you have same user for your VPS and shared hosting spac
 
 3) **AngularJS** - A superheroic Javascript MVW Framework by Google
 
+### Same functionality using jQuery? => Yes
+I have added 3 new files in the same project for better understanding in.
+Controller : jquery.php
+View : jquery.php
+Assets/App : Connection2.js
+
+URL :
+```sh
+http://localhost/ci-ratchet/index.php/jquery
+```
