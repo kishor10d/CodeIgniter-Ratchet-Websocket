@@ -74,10 +74,10 @@ It will work for sure if you have same user for your VPS and shared hosting spac
 
 I have added 3 new files in the same project for better understanding in.
 
-Controller : jquery.php
+application/controllers/jquery.php
 
-View : jquery.php
+application/views/jquery.php
 
-Assets/App : Connection2.js
+assets/app/Connection2.js
 
 URL : <http://localhost/ci-ratchet/index.php/jquery>
