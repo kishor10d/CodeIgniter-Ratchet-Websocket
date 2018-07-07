@@ -1,4 +1,7 @@
 # CodeIgniter-Ratchet-Websocket
+
+> ### `NOTICE : This project is NOT production ready.`
+
 This library contains the demo of commenting/posting realtime using **CodeIgniter-Ratchet-Websocket** with **AngularJS** as client-side javascript framwork.
 
 There is no rocket science I have done to achieve this.
