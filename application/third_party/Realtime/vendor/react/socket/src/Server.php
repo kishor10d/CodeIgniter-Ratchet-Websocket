@@ -3,69 +3,112 @@
 namespace React\Socket;
 
 use Evenement\EventEmitter;
+use React\EventLoop\Loop;
 use React\EventLoop\LoopInterface;
+use Exception;
 
-/** @event connection */
-class Server extends EventEmitter implements ServerInterface
+/**
+ * @deprecated 1.9.0 See `SocketServer` instead
+ * @see SocketServer
+ */
+final class Server extends EventEmitter implements ServerInterface
 {
-    public $master;
-    private $loop;
+    private $server;
 
-    public function __construct(LoopInterface $loop)
+    /**
+     * [Deprecated] `Server`
+     *
+     * This class exists for BC reasons only and should not be used anymore.
+     *
+     * ```php
+     * // deprecated
+     * $socket = new React\Socket\Server(0);
+     * $socket = new React\Socket\Server('127.0.0.1:8000');
+     * $socket = new React\Socket\Server('127.0.0.1:8000', null, $context);
+     * $socket = new React\Socket\Server('127.0.0.1:8000', $loop, $context);
+     *
+     * // new
+     * $socket = new React\Socket\SocketServer('127.0.0.1:0');
+     * $socket = new React\Socket\SocketServer('127.0.0.1:8000');
+     * $socket = new React\Socket\SocketServer('127.0.0.1:8000', $context);
+     * $socket = new React\Socket\SocketServer('127.0.0.1:8000', $context, $loop);
+     * ```
+     *
+     * This class takes an optional `LoopInterface|null $loop` parameter that can be used to
+     * pass the event loop instance to use for this object. You can use a `null` value
+     * here in order to use the [default loop](https://github.com/reactphp/event-loop#loop).
+     * This value SHOULD NOT be given unless you're sure you want to explicitly use a
+     * given event loop instance.
+     *
+     * For BC reasons, you can also pass the TCP socket context options as a simple
+     * array without wrapping this in another array under the `tcp` key.
+     *
+     * @param string|int    $uri
+     * @param LoopInterface $loop
+     * @param array         $context
+     * @deprecated 1.9.0 See `SocketServer` instead
+     * @see SocketServer
+     */
+    public function __construct($uri, LoopInterface $loop = null, array $context = array())
     {
-        $this->loop = $loop;
-    }
+        $loop = $loop ?: Loop::get();
 
-    public function listen($port, $host = '127.0.0.1')
-    {
-        if (strpos($host, ':') !== false) {
-            // enclose IPv6 addresses in square brackets before appending port
-            $host = '[' . $host . ']';
+        // sanitize TCP context options if not properly wrapped
+        if ($context && (!isset($context['tcp']) && !isset($context['tls']) && !isset($context['unix']))) {
+            $context = array('tcp' => $context);
         }
 
-        $this->master = @stream_socket_server("tcp://$host:$port", $errno, $errstr);
-        if (false === $this->master) {
-            $message = "Could not bind to tcp://$host:$port: $errstr";
-            throw new ConnectionException($message, $errno);
+        // apply default options if not explicitly given
+        $context += array(
+            'tcp' => array(),
+            'tls' => array(),
+            'unix' => array()
+        );
+
+        $scheme = 'tcp';
+        $pos = \strpos($uri, '://');
+        if ($pos !== false) {
+            $scheme = \substr($uri, 0, $pos);
         }
-        stream_set_blocking($this->master, 0);
 
-        $this->loop->addReadStream($this->master, function ($master) {
-            $newSocket = stream_socket_accept($master);
-            if (false === $newSocket) {
-                $this->emit('error', array(new \RuntimeException('Error accepting new connection')));
+        if ($scheme === 'unix') {
+            $server = new UnixServer($uri, $loop, $context['unix']);
+        } else {
+            $server = new TcpServer(str_replace('tls://', '', $uri), $loop, $context['tcp']);
 
-                return;
+            if ($scheme === 'tls') {
+                $server = new SecureServer($server, $loop, $context['tls']);
             }
-            $this->handleConnection($newSocket);
+        }
+
+        $this->server = $server;
+
+        $that = $this;
+        $server->on('connection', function (ConnectionInterface $conn) use ($that) {
+            $that->emit('connection', array($conn));
+        });
+        $server->on('error', function (Exception $error) use ($that) {
+            $that->emit('error', array($error));
         });
     }
 
-    public function handleConnection($socket)
+    public function getAddress()
     {
-        stream_set_blocking($socket, 0);
-
-        $client = $this->createConnection($socket);
-
-        $this->emit('connection', array($client));
+        return $this->server->getAddress();
     }
 
-    public function getPort()
+    public function pause()
     {
-        $name = stream_socket_get_name($this->master, false);
-
-        return (int) substr(strrchr($name, ':'), 1);
+        $this->server->pause();
     }
 
-    public function shutdown()
+    public function resume()
     {
-        $this->loop->removeStream($this->master);
-        fclose($this->master);
-        $this->removeAllListeners();
+        $this->server->resume();
     }
 
-    public function createConnection($socket)
+    public function close()
     {
-        return new Connection($socket, $this->loop);
+        $this->server->close();
     }
 }

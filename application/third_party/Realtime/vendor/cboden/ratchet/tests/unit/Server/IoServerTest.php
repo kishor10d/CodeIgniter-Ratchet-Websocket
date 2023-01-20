@@ -2,6 +2,7 @@
 namespace Ratchet\Server;
 use Ratchet\Server\IoServer;
 use React\EventLoop\StreamSelectLoop;
+use React\EventLoop\LoopInterface;
 use React\Socket\Server;
 
 /**
@@ -16,14 +17,22 @@ class IoServerTest extends \PHPUnit_Framework_TestCase {
 
     protected $reactor;
 
+    protected function tickLoop(LoopInterface $loop) {
+        $loop->futureTick(function () use ($loop) {
+            $loop->stop();
+        });
+
+        $loop->run();
+    }
+
     public function setUp() {
         $this->app = $this->getMock('\\Ratchet\\MessageComponentInterface');
 
         $loop = new StreamSelectLoop;
-        $this->reactor = new Server($loop);
-        $this->reactor->listen(0);
+        $this->reactor = new Server(0, $loop);
 
-        $this->port   = $this->reactor->getPort();
+        $uri = $this->reactor->getAddress();
+        $this->port   = parse_url((strpos($uri, '://') === false ? 'tcp://' : '') . $uri, PHP_URL_PORT);
         $this->server = new IoServer($this->app, $this->reactor, $loop);
     }
 
@@ -32,7 +41,7 @@ class IoServerTest extends \PHPUnit_Framework_TestCase {
 
         $client = stream_socket_client("tcp://localhost:{$this->port}");
 
-        $this->server->loop->tick();
+        $this->tickLoop($this->server->loop);
 
         //$this->assertTrue(is_string($this->app->last['onOpen'][0]->remoteAddress));
         //$this->assertTrue(is_int($this->app->last['onOpen'][0]->resourceId));
@@ -52,16 +61,16 @@ class IoServerTest extends \PHPUnit_Framework_TestCase {
         socket_set_block($client);
         socket_connect($client, 'localhost', $this->port);
 
-        $this->server->loop->tick();
+        $this->tickLoop($this->server->loop);
 
         socket_write($client, $msg);
-        $this->server->loop->tick();
+        $this->tickLoop($this->server->loop);
 
         socket_shutdown($client, 1);
         socket_shutdown($client, 0);
         socket_close($client);
 
-        $this->server->loop->tick();
+        $this->tickLoop($this->server->loop);
     }
 
     public function testOnClose() {
@@ -73,13 +82,13 @@ class IoServerTest extends \PHPUnit_Framework_TestCase {
         socket_set_block($client);
         socket_connect($client, 'localhost', $this->port);
 
-        $this->server->loop->tick();
+        $this->tickLoop($this->server->loop);
 
         socket_shutdown($client, 1);
         socket_shutdown($client, 0);
         socket_close($client);
 
-        $this->server->loop->tick();
+        $this->tickLoop($this->server->loop);
     }
 
     public function testFactory() {

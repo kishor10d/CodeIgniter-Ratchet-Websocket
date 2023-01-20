@@ -4,29 +4,27 @@ namespace React\Stream;
 
 use Evenement\EventEmitter;
 
-class CompositeStream extends EventEmitter implements DuplexStreamInterface
+final class CompositeStream extends EventEmitter implements DuplexStreamInterface
 {
-    protected $readable;
-    protected $writable;
-    protected $pipeSource;
+    private $readable;
+    private $writable;
+    private $closed = false;
 
     public function __construct(ReadableStreamInterface $readable, WritableStreamInterface $writable)
     {
         $this->readable = $readable;
         $this->writable = $writable;
 
-        Util::forwardEvents($this->readable, $this, array('data', 'end', 'error', 'close'));
-        Util::forwardEvents($this->writable, $this, array('drain', 'error', 'close', 'pipe'));
+        if (!$readable->isReadable() || !$writable->isWritable()) {
+            $this->close();
+            return;
+        }
+
+        Util::forwardEvents($this->readable, $this, array('data', 'end', 'error'));
+        Util::forwardEvents($this->writable, $this, array('drain', 'error', 'pipe'));
 
         $this->readable->on('close', array($this, 'close'));
         $this->writable->on('close', array($this, 'close'));
-
-        $this->on('pipe', array($this, 'handlePipeEvent'));
-    }
-
-    public function handlePipeEvent($source)
-    {
-        $this->pipeSource = $source;
     }
 
     public function isReadable()
@@ -36,17 +34,13 @@ class CompositeStream extends EventEmitter implements DuplexStreamInterface
 
     public function pause()
     {
-        if ($this->pipeSource) {
-            $this->pipeSource->pause();
-        }
-
         $this->readable->pause();
     }
 
     public function resume()
     {
-        if ($this->pipeSource) {
-            $this->pipeSource->resume();
+        if (!$this->writable->isWritable()) {
+            return;
         }
 
         $this->readable->resume();
@@ -54,9 +48,7 @@ class CompositeStream extends EventEmitter implements DuplexStreamInterface
 
     public function pipe(WritableStreamInterface $dest, array $options = array())
     {
-        Util::pipe($this, $dest, $options);
-
-        return $dest;
+        return Util::pipe($this, $dest, $options);
     }
 
     public function isWritable()
@@ -71,14 +63,21 @@ class CompositeStream extends EventEmitter implements DuplexStreamInterface
 
     public function end($data = null)
     {
+        $this->readable->pause();
         $this->writable->end($data);
     }
 
     public function close()
     {
-        $this->pipeSource = null;
+        if ($this->closed) {
+            return;
+        }
 
+        $this->closed = true;
         $this->readable->close();
         $this->writable->close();
+
+        $this->emit('close');
+        $this->removeAllListeners();
     }
 }
